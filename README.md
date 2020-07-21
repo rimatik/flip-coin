@@ -26,3 +26,7 @@ npm i -g truffle@nodeLTS
 rm build 
 truffle console
 migrate
+
+
+### Deploy to Ropsten testnet
+truffle migrate --network ropsten

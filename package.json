@@ -1,0 +1,25 @@
+{
+  "dependencies": {
+    "@truffle/hdwallet-provider": "^1.0.35",
+    "fs-extra": "^9.0.0",
+    "truffle-hdwallet-provider": "^1.0.17"
+  },
+  "name": "flip-coin",
+  "description": "- install  Ganache-2.1.1 version\r - npm install -g truffle",
+  "version": "1.0.0",
+  "main": "truffle-config.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tito6666/flip-coin.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tito6666/flip-coin/issues"
+  },
+  "homepage": "https://github.com/tito6666/flip-coin#readme"
+}
