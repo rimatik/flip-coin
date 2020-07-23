@@ -2,110 +2,67 @@ pragma solidity 0.6.2;
 import "./Ownable.sol";
 import "./Random.sol";
 
-// 1. Make multiple users play game
-
-contract PlayerContr is Random{
-
-  struct Player {
-  uint id;
-  bytes32 queryId;
-  uint balance;
-  bool exists;
-}
-
-uint private playerId;
-
-
-mapping (address => Player) private players;
-address[] private playerAddresses;
-
-function getRandomNum() public
-{
-  bytes32 queryId = testRandom();
-  Player memory player;
-  if(!players[msg.sender].exists){
-      player.id = getPlayerId();
-      player.exists = true;
-      player.queryId = queryId;
-      insertPlayer(player);
-      playerAddresses.push(msg.sender);
-  }else
-  {
-    player = players[msg.sender];
-    player.queryId = queryId;
-    updatePlayer(player);
+contract CoinFlip is Ownable{
+    
+    struct Bet {
+        address player;
+        uint256 value;
+    }
+    
+    Random random;
+   
+    event error(string description);
+    event lowLevelError(bytes description);
+    event LogQueryId(bytes32 queryId);
+    event LogBalance(uint256 balance);
+    event LogWithdraw(bool success);
+ 
+  constructor() public payable{
+     random = new Random();
   }
-}
-
-  function getPlayerId() private returns (uint) {
-    return playerId++;
-  }
-
-   function insertPlayer(Player memory player) private {
-        address creator = msg.sender;
-        players[creator] = player;
-    }
-
-     function updatePlayer(Player memory player) private {
-        address creator = msg.sender;
-        players[creator] = player;
-    }
-}
-
-contract CoinFlip is Ownable, PlayerContr{
- PlayerContr playerContr;
- event placedBet(address user, uint bet, bool success);
- event error(string reason);
- event lowLevelError(bytes lowLevelData);
-
- uint public balance;
-
-  constructor(uint initialSupply) public payable{
-     balance = initialSupply;
-        playerContr = new PlayerContr();
-    }
 
   modifier costs(uint cost){
       require(msg.value >= cost,"Error");
       _;
   }
-
-  function getRandom() public payable costs(0.05 ether) returns(bool){
-    require(address(this).balance >= msg.value, "Not enough funds!");
-    try playerContr.getRandomNum(){
-      return true;
+  
+  function flip() payable costs(0.01 ether) public{
+  require(msg.value * 3 < payable(address(this)).balance, "Not enough balance");
+   (bool isWin, uint256 value) = random.getResult(msg.sender);
+  require(isWin == false, "Withdraw your funds before next play");
+    try random.update{value: msg.value}() returns (bytes32 queryId){
+       emit LogQueryId(queryId);
+       random.setBet(queryId,msg.sender,msg.value);
     }catch Error(string memory reason) {
         // This is executed in case
         // revert was called inside getData
         // and a reason string was provided.
         emit error(reason);
-        return false;
     } catch (bytes memory lowLevelData) {
         // This is executed in case revert() was used
         // or there was a failing assertion, division
         // by zero, etc. inside getData.
         emit lowLevelError(lowLevelData);
-        return false;
     }
   }
-
   
-
-  function flipCoin(uint256 randomNum) public payable costs(0.05 ether)  returns(bool){
-    bool success = false;
-    if(randomNum % 2 == 1)
-    {
-      success = true;
-      balance -= msg.value;
-      msg.sender.transfer(msg.value * 2);
-    }else {
-      balance += msg.value;
+  
+  function withdrawPlayerFunds() onlyOwner payable costs(0.01 ether) public{
+    try random.withdrawBet{value: msg.value}() returns(bool success){
+    }catch Error(string memory reason) {
+        // This is executed in case
+        // revert was called inside getData
+        // and a reason string was provided.
+        emit error(reason);
+    } catch (bytes memory lowLevelData) {
+        // This is executed in case revert() was used
+        // or there was a failing assertion, division
+        // by zero, etc. inside getData.
+        emit lowLevelError(lowLevelData);
     }
-
-    emit placedBet(msg.sender, msg.value, success);
-
-   return success;
   }
-
- 
+  
+  receive() external payable { }
+  
+  fallback() external payable {}
 }

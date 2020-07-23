@@ -3,7 +3,7 @@ var contractInstance;
 
 $(document).ready(function() {
     window.ethereum.enable().then(function(accounts){
-      contractInstance = new web3.eth.Contract(abi,"0x0bb6C78A667bd3CCBda20a0A54b51c3386F95156",{from: accounts[0]});
+      contractInstance = new web3.eth.Contract(abi,"0xEf69E19cf9A5De3C7bCFb5378c5547fb4367effe",{from: accounts[0]});
       web3.eth.net.getNetworkType()
         .then((val) =>   $("#walletNetworkId").text(val));
       var account = web3.currentProvider.selectedAddress;
@@ -32,7 +32,7 @@ $(document).ready(function() {
           {
             $("#amount_input_error").hide();
             flipCoin();
-            $("#pendingModal").modal();
+            //$("#pendingModal").modal();
             
           }
           else showError();
@@ -49,42 +49,27 @@ function flipCoin(){
   var amount = $("#amount_input").val();
 
   var config = {
-    value: web3.utils.toWei("0.05", "ether")
+    value: web3.utils.toWei(amount, "ether")
   }
-    contractInstance.methods.getRandom().send(config)
+    contractInstance.methods.flip().send(config)
     .on("transactionHash", function(hash){
-      console.log(hash);
+      console.log("https://ropsten.etherscan.io/tx/" + hash);
+      $("#transactionLinkId").attr('href', "https://ropsten.etherscan.io/tx/" + hash);
     })
     .on("receipt", function(receipt){
-      console.log(receipt.events.error.returnValues[2]);
-      console.log(receipt.events.lowLevelError.returnValues[2]);
-      console.log(receipt.events.generatedRandomNumber.returnValues[2]);
-      if(!isNaN(receipt.events.generatedRandomNumber.returnValues[2]));
-      {
-        var cnfg = {
-          value: web3.utils.toWei(amount, "ether")
-        }
-        contractInstance.methods.flipCoin(receipt.events.generatedRandomNumber.returnValues[2]).send(cnfg)
-        .on("transactionHash", function(hash){
-          console.log(hash);
-          $("#transactionLinkId").attr('href', "https://ropsten.etherscan.io/tx/" + hash);
-        })
-        .on("receipt", function(receipt){
-          $("#pendingDialog").hide();
-          if(receipt.events.placedBet.returnValues[2] === false){
-            $("#flip_coin_result").text("You lose, we're sorry, play again!");
-              $("#flip_coin_result").css("color", "red");
-          }
-          else if(receipt.events.placedBet.returnValues[2] === true){
+      console.log("tu sam!")
+      var isWin = receipt.events.placedBet.returnValues['isWin'];
+        //$("#pendingDialog").hide();
+        if(isWin){
             $("#flip_coin_result").text("You won, congratulations!");
-              $("#flip_coin_result").css("color", "green");
-          }
-        })
-       
-      }
+            $("#flip_coin_result").css("color", "green");
+        }
+        else{
+          $("#flip_coin_result").text("You lose, we're sorry, play again!");
+          $("#flip_coin_result").css("color", "red");
+        }
     })
     .on("error", function(error){
-      console.log(error.events.error.returnValues[2]);
       $("#pendingDialog").hide();
        $("#flip_coin_result").text("Something went wrong!");
        $("#flip_coin_result").css("color", "red");
