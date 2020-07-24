@@ -3,7 +3,7 @@ var contractInstance;
 
 $(document).ready(function() {
     window.ethereum.enable().then(function(accounts){
-      contractInstance = new web3.eth.Contract(abi,"0xEf69E19cf9A5De3C7bCFb5378c5547fb4367effe",{from: accounts[0]});
+      contractInstance = new web3.eth.Contract(abi,"0xeBD54453e73ea31c9164dB3bE5bf5f7B1Cb290B8",{from: accounts[0]});
       web3.eth.net.getNetworkType()
         .then((val) =>   $("#walletNetworkId").text(val));
       var account = web3.currentProvider.selectedAddress;
@@ -32,8 +32,6 @@ $(document).ready(function() {
           {
             $("#amount_input_error").hide();
             flipCoin();
-            //$("#pendingModal").modal();
-            
           }
           else showError();
 				});
@@ -43,11 +41,29 @@ $(document).ready(function() {
          if(amount && amount > 0.099 && amount < 11){ $("#amount_input_error").hide() }
          else showError();
        });
+
+       $("#withdraw_funds_button").click(function() {
+         console.log("tu sam!")
+          withdraw();
+      });
 });
 
+function getLastResult(){
+  contractInstance.methods.getResult(web3.currentProvider.selectedAddress).call().then((result) => {
+    var isWin = result['0'];
+    console.log(isWin)
+    if(isWin)
+    {
+      $("#withdraw_funds_button").css("visibility", "visible");
+    }else {
+      $("#withdraw_funds_button").css("visibility", "hidden");
+      flipCoin();
+    }
+  });
+}
 function flipCoin(){
   var amount = $("#amount_input").val();
-
+  $("#pendingModal").modal();
   var config = {
     value: web3.utils.toWei(amount, "ether")
   }
@@ -57,9 +73,8 @@ function flipCoin(){
       $("#transactionLinkId").attr('href', "https://ropsten.etherscan.io/tx/" + hash);
     })
     .on("receipt", function(receipt){
-      console.log("tu sam!")
       var isWin = receipt.events.placedBet.returnValues['isWin'];
-        //$("#pendingDialog").hide();
+        $("#pendingModal").modal('hide');
         if(isWin){
             $("#flip_coin_result").text("You won, congratulations!");
             $("#flip_coin_result").css("color", "green");
@@ -70,7 +85,30 @@ function flipCoin(){
         }
     })
     .on("error", function(error){
-      $("#pendingDialog").hide();
+      $("#pendingModal").hide();
+       $("#flip_coin_result").text("Something went wrong!");
+       $("#flip_coin_result").css("color", "red");
+    })
+}
+
+function withdraw(){
+  var config = {
+    value: web3.utils.toWei("0.01", "ether")
+  }
+    contractInstance.methods.withdrawPlayerFunds().send(config)
+    .on("transactionHash", function(hash){
+      console.log(hash)
+    })
+    .on("receipt", function(receipt){
+      console.log(receipt)
+      var withdraw = receipt.events.logWithdraw.returnValues['withdraw'];
+      if(withdraw){
+        $("#withdraw_funds_result").css("visibility", " visible");
+      }else {
+        $("#withdraw_funds_result").css("visibility", " hidden");
+      }
+    })
+    .on("error", function(error){
        $("#flip_coin_result").text("Something went wrong!");
        $("#flip_coin_result").css("color", "red");
     })
