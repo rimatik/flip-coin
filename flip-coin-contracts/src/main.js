@@ -3,7 +3,25 @@ var contractInstance;
 
 $(document).ready(function() {
     window.ethereum.enable().then(function(accounts){
-      contractInstance = new web3.eth.Contract(abi,"0xeBD54453e73ea31c9164dB3bE5bf5f7B1Cb290B8",{from: accounts[0]});
+      contractInstance = new web3.eth.Contract(abi,"0x9D31B96E5ABB23f1fab41cc2533B1416A58e155C",{from: accounts[0]});
+      var event = contractInstance.events.placedBet(function(error, result) {
+        console.log(result); 
+        if(error){
+          console.log(error); 
+        }
+        
+         var isWin = result.returnValues['isWin'];
+          $("#pendingModal").modal('hide');
+          if(isWin){
+              $("#flip_coin_result").text("You won, congratulations!");
+              $("#flip_coin_result").css("color", "green");
+          }
+          else{
+            $("#flip_coin_result").text("You lose, we're sorry, play again!");
+            $("#flip_coin_result").css("color", "red");
+          }
+     });
+
       web3.eth.net.getNetworkType()
         .then((val) =>   $("#walletNetworkId").text(val));
       var account = web3.currentProvider.selectedAddress;
@@ -46,6 +64,19 @@ $(document).ready(function() {
          console.log("tu sam!")
           withdraw();
       });
+
+
+      
+
+      // var eventBetResolved=contractInstance.events.placedBet(function(err, result){
+      //   if (err){
+      //     console.log(err);
+      //   }
+      //   else{
+      //     console.log(result);
+          
+        // }
+      // })
 });
 
 function getLastResult(){
@@ -73,16 +104,17 @@ function flipCoin(){
       $("#transactionLinkId").attr('href', "https://ropsten.etherscan.io/tx/" + hash);
     })
     .on("receipt", function(receipt){
-      var isWin = receipt.events.placedBet.returnValues['isWin'];
-        $("#pendingModal").modal('hide');
-        if(isWin){
-            $("#flip_coin_result").text("You won, congratulations!");
-            $("#flip_coin_result").css("color", "green");
-        }
-        else{
-          $("#flip_coin_result").text("You lose, we're sorry, play again!");
-          $("#flip_coin_result").css("color", "red");
-        }
+      console.log(receipt)
+      // var isWin = receipt.events.placedBet.returnValues['isWin'];
+      //   $("#pendingModal").modal('hide');
+      //   if(isWin){
+      //       $("#flip_coin_result").text("You won, congratulations!");
+      //       $("#flip_coin_result").css("color", "green");
+      //   }
+      //   else{
+      //     $("#flip_coin_result").text("You lose, we're sorry, play again!");
+      //     $("#flip_coin_result").css("color", "red");
+      //   }
     })
     .on("error", function(error){
       $("#pendingModal").hide();

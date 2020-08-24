@@ -1,4 +1,4 @@
-pragma solidity 0.6.2;
+pragma solidity 0.5.12;
 import "./Ownable.sol";
 import "./provableAPI.sol";
 
@@ -20,7 +20,7 @@ contract CoinFlip is Ownable,usingProvable{
      bytes32[] private bets;
     
     event LogNewProvableQuery(string description);
-    event generatedRandomNumber(uint256 randomNumber);
+    event generatedRandomNumber(uint256 randomNumber,string isWin);
     event logCallbackResult(bytes32 queryId,string res,bytes _proof);
     event placedBet(address player, uint256 value, bool isWin);
     event logQueryId(bytes32 queryId);
@@ -48,17 +48,18 @@ contract CoinFlip is Ownable,usingProvable{
       payable
       //returns (bytes32)
     {
-        require(msg.value * 3 < payable(address(this)).balance, "Not enough balance");
+        
+        require(msg.value * 3 < address(this).balance, "Not enough balance");
         uint256 QUERY_EXECUTION_DELAY = 0;
         uint256 GAS_FOR_CALLBACK = 200000;
-        bytes32 queryId = testRandom(msg.sender);
-        //bytes32 queryId = provable_newRandomDSQuery(
-          //QUERY_EXECUTION_DELAY,
-          //NUM_RANDOM_BYTES_REQUESTED,
-          //GAS_FOR_CALLBACK
-        //);
+        //bytes32 queryId = testRandom(msg.sender);
+        bytes32 queryId = provable_newRandomDSQuery(
+          QUERY_EXECUTION_DELAY,
+          NUM_RANDOM_BYTES_REQUESTED,
+          GAS_FOR_CALLBACK
+        );
          setBet(queryId,msg.sender,msg.value);
-           __callback(queryId,"0",bytes("test"));
+         //__callback(queryId,"0",bytes("test"));
         emit logQueryId(queryId);
         emit LogNewProvableQuery("Provable query was sent, standing by for the answer.");
    }
@@ -85,7 +86,8 @@ contract CoinFlip is Ownable,usingProvable{
       return(waiting[queryId].player,waiting[queryId].value);
     }
     
-    function  __callback(bytes32 _queryId, string memory _result, bytes memory _proof) public override(usingProvable){
+    function  __callback(bytes32 _queryId, string memory _result, bytes memory _proof) public {
+        require(msg.sender==provable_cbAddress()); //only the oracle can call this function
         //require(msg.sender == provable_cbAddress(),"Error");
         emit logCallbackResult(_queryId,_result, _proof);
         uint256 randomNum = uint256(keccak256(abi.encodePacked(_result))) % 2;
@@ -96,25 +98,27 @@ contract CoinFlip is Ownable,usingProvable{
         result.isWin = isWin;
         result.value = value;
         results[player] = result;
-        if(isWin){
-            (bool success, bytes memory data)  = (msg.sender).call{value: value * 2}(abi.encodeWithSignature("withdrawBet(string)", "CoinFlip"));
-        }
+        //if(isWin){
+            //msg.sender.transfer(value * 2);
+            //(bool success, bytes memory data)  = (msg.sender).call{value: value * 2}(abi.encodeWithSignature("withdrawBet(string)", "CoinFlip"));
+        //}
         emit placedBet(player, value, isWin);
         latestNumber = randomNum;
         delete waiting[_queryId];
-        emit generatedRandomNumber(randomNum);
+        emit generatedRandomNumber(randomNum,"tu sam!");
     }
   
   
-  function withdrawPlayerFunds() onlyOwner payable costs(0.01 ether) public returns(bool){
-        (bool isWin, uint256 value) = getResult(msg.sender);
-        require(isWin == true, "Can't withdraw funds");
-        (bool success, bytes memory data)  = (msg.sender).call{value: value * 2}(abi.encodeWithSignature("withdrawBet(string)", "CoinFlip"));
-        emit logWithdraw(success);
-        return success;
-  }
+  //function withdrawPlayerFunds() onlyOwner payable costs(0.01 ether) public returns(bool){
+        //(bool isWin, uint256 value) = getResult(msg.sender);
+        //require(isWin == true, "Can't withdraw funds");
+        //(bool success, bytes memory data)  = (msg.sender).call{value: value * 2}(abi.encodeWithSignature("withdrawBet(string)", "CoinFlip"));
+        //emit logWithdraw(success);
+        //return success;
+  //}
   
-  receive() external payable { }
+  function fallback() external payable {}
+  function receive() external payable { }
   
-  fallback() external payable {}
+
 }
