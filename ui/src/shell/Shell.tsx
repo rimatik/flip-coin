@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme: Theme) =>
     content: {
       padding: theme.spacing(2),
       flexGrow: 1,
-      marginTop: 50,
+      marginTop: 10,
       [theme.breakpoints.down('sm')]: {
         marginTop: 60,
       },
