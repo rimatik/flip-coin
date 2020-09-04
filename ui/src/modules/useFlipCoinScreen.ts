@@ -12,18 +12,16 @@ export default function useFlipCoinScreen() {
     const [contract, setContract] = useState<any>();
     const [headsOrTails,setHeadsOrTails] = useState<number>(1);
     const [web3prov,setWeb3Prov] = useState<Web3>();
-    const [networkName,setNetworkName] = useState<string>();
     const [chainUrl,setChainUrl] = useState<string>("ropsten");
     const [account,setAccount] = useState<any>();
 
-    const contractHash = "0x4c5226029c21279bd9d7bea37cf69b3058d57d97";
+    const contractHash = "0xa47313794540a4c7352b6b8459a287280297df19";
 
     useEffect(() => {
         if (window.ethereum) {
             const web3 = new Web3(window.ethereum);
             setWeb3Prov(web3)
             web3.eth.net.getNetworkType((error : Error,returnValue : string) => {
-                setNetworkName(returnValue)
                 setChainUrl(`https://${returnValue}.etherscan.io/tx/`);
             })
             try { 
@@ -85,6 +83,7 @@ export default function useFlipCoinScreen() {
             .on("error", function(error : any){
                 console.log(error)
                 setIsError(true)
+                setIsLoading(false)
             });
         }
        
@@ -130,7 +129,8 @@ export default function useFlipCoinScreen() {
         transLink, 
         isLoading, 
         headsOrTails,
-        networkName,
+        setIsLost,
+        setIsWin,
         onHeadsOrTails,
         setTransLink,
         onSubmit,

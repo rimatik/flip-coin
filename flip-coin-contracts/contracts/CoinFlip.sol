@@ -38,7 +38,7 @@ contract CoinFlip is Ownable,usingProvable{
    function flip(uint256 headsOrTails) payable costs(0.01 ether) public{
         require(msg.value * 3 < address(this).balance, "Not enough balance");
         uint256 QUERY_EXECUTION_DELAY = 0;
-        uint256 GAS_FOR_CALLBACK = 3000000;
+        uint256 GAS_FOR_CALLBACK = 200000;
         bytes32 queryId = provable_newRandomDSQuery(
           QUERY_EXECUTION_DELAY,
           NUM_RANDOM_BYTES_REQUESTED,
