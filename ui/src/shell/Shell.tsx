@@ -24,9 +24,6 @@ const useStyles = makeStyles((theme: Theme) =>
       [theme.breakpoints.down('sm')]: {
         marginTop: 60,
       },
-    },
-    walletContainer:{
-    
     }
   })
 );

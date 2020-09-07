@@ -60,8 +60,11 @@ const useStyles = makeStyles(() =>
         },
         toggleGroupContainer:{
             marginBottom: '20px'
+        },
+        ethImg:{
+            height: '150px',
+            width: '150px' 
         }
-
     })
 );
 
@@ -109,7 +112,19 @@ const FlipCoinScreen = () => {
                                     <Grid item className={classes.contentCenter} xs={12}><CircularProgress size={50}/></Grid><br/>
                                     <Grid item className={classes.contentCenter} xs={12}><a href={transLink}>View on etherscan</a></Grid>
                                 </Grid> :
-                            !isWin ? <form onSubmit={handleSubmit(onSubmit)}>
+                            isWin ?  
+                            <Grid item className={classes.contentCenter}>
+                                <img src={Etherum} className={classes.ethImg} alt="Etherum"/>
+                                <Typography className={classes.flipCoinWonText}>You won congratulations!</Typography><br />
+                                <Button variant="contained" className={classes.withrdrawBtn} size="large" type="submit" onClick={onWithdraw}>Withdraw funds</Button>
+                            </Grid> : 
+                            isLost ? 
+                             <Grid item xs={12} className={classes.contentCenter}>
+                                 <img src={Etherum} className={classes.ethImg} alt="Etherum"/>
+                                 <Typography color="error">You lose, we're sorry!</Typography>
+                                 <Button variant="contained" className={classes.withrdrawBtn} size="large" type="submit" onClick={onPlayAgain}>Play again</Button>
+                             </Grid> :
+                            <form onSubmit={handleSubmit(onSubmit)}>
                                     <Grid container>
                                         <Grid item className={classes.toggleGroupContainer} container xs={12} justify="center">
                                         <ToggleButtonGroup  value={headsOrTails} exclusive onChange={onHeadsOrTails}>
@@ -158,21 +173,11 @@ const FlipCoinScreen = () => {
                                         <Grid item container justify="center" className={classes.flipCoinBtnContainer}>
                                             <Button variant="contained" size="large" type="submit" className={classes.flipCoinBtn}>Flip coin</Button>
                                         </Grid>
-                                        {isError && <Grid item xs={12} className={classes.contentCenter}><Typography className={classes.flipCoinError}>Something went wrong!</Typography></Grid>}
-                                        {isLost && 
-                                            <Grid item xs={12} className={classes.contentCenter}>
-                                                <img src={Etherum} style={{ height: '150px', width: '150px' }} alt="Etherum"/>
-                                                <Typography style={{ color: 'red' }}>You lose, we're sorry!</Typography>
-                                                <Button variant="contained" className={classes.withrdrawBtn} size="large" type="submit" onClick={onPlayAgain}>Play again</Button>
-                                            </Grid>
-                                        }
+                                       
                                     </Grid>
-                                </form> : 
-                                <Grid item className={classes.contentCenter}>
-                                    <img src={Etherum} style={{ height: '150px', width: '150px' }} alt="Etherum"/>
-                                    <Typography className={classes.flipCoinWonText}>You won congratulations!</Typography><br />
-                                    <Button variant="contained" className={classes.withrdrawBtn} size="large" type="submit" onClick={onWithdraw}>Withdraw funds</Button>
-                                </Grid>}
+                                </form> 
+                                }
+                                {isError && <Grid item xs={12} className={classes.contentCenter}><Typography className={classes.flipCoinError}>Something went wrong!</Typography></Grid>}
                             </Grid>
                         </Grid>
                     </Box>

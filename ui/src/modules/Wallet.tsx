@@ -2,7 +2,7 @@ import {formatEther} from'@ethersproject/units'
 import { useWeb3React } from '@web3-react/core'
 import { InjectedConnector } from '@web3-react/injected-connector'
 import React, { useEffect } from 'react';
-import { Grid, Typography, Button, makeStyles, createStyles } from '@material-ui/core';
+import { Grid, Typography, Button, makeStyles, createStyles, Container, Box } from '@material-ui/core';
 import { Web3Provider } from '@ethersproject/providers'
 import useSWR from 'swr'
 import Metamask from '../images/metamask.jpg';
@@ -36,21 +36,22 @@ const fetcher = (library : any) => (...args : any) => {
 }
 
 const useStyles = makeStyles(() =>
-    createStyles({
-        connectWalletBtn:{
-          color: "#555b6e", 
-          borderRadius: "10px",
-           backgroundColor:"#ffd6ba",
-           textAlign: "center" 
-      },
-      metamaskImage:{
-          maxWidth: '150px',
-          maxHeight: '150px'
-      },
-      balance : {
-        background: "#F9E0D9", 
-        borderRadius: "5px",
-         padding: "2px 12px" 
+  createStyles({
+    connectWalletBtn:{
+      color: "#555b6e", 
+      borderRadius: "10px",
+      backgroundColor:"#ffd6ba",
+      textAlign: "center" 
+    },
+    metamaskImage:{
+      maxWidth: '150px',
+      maxHeight: '150px',
+      marginBottom: "5px"
+    },
+    balance : {
+      background: "#F9E0D9", 
+      borderRadius: "5px",
+      padding: "2px 12px" 
     },
     networkName: {
       background: "#F1EBE4", 
@@ -59,12 +60,25 @@ const useStyles = makeStyles(() =>
     },
     contentCenter:{
       textAlign: "center" 
-  },
-  flipCoinHeader:{
-    marginTop: '3px',
-    color: "#555b6e" 
-  },
-    })
+    },
+    flipCoinHeader:{
+      marginTop: '3px',
+      color: "#555b6e" 
+    },
+    flipCoinBox:{
+      borderRadius:"10px",
+      backgroundColor:"#faf9f9",
+      height: '450px',
+      maxHeight: '450px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: "center"
+    },
+    connectWalletItem:{
+      marginTop: '75px',
+      textAlign: 'center' 
+    }
+})
 );
 
 interface IWallet {
@@ -112,13 +126,19 @@ const Wallet = ({ onConnect } : IWallet ) => {
                 />
               <Typography variant="h4" className={classes.flipCoinHeader}>Flip coin</Typography>
           </Grid>
-          <Grid item xs={12} style={{  marginTop: "200px", textAlign: "center" }}>
-              <Grid item className={classes.contentCenter} xs={12}>
-                <img src={Metamask} className={classes.metamaskImage} alt="metamask"/>
-              </Grid>
-              <Grid className={classes.contentCenter} xs={12}>
-                <Button variant="contained" size="large" type="submit" className={classes.connectWalletBtn} onClick={handleConnectWalletClick}>Connect wallet</Button> 
-            </Grid>
+          <Grid item xs={12} className={classes.connectWalletItem}>
+            <Container maxWidth="sm">
+              <Box display="flex" className={classes.flipCoinBox} justifyContent="center">
+                <Grid container>
+                  <Grid item className={classes.contentCenter} xs={12}>
+                    <img src={Metamask} className={classes.metamaskImage} alt="metamask"/>
+                  </Grid>
+                  <Grid className={classes.contentCenter} xs={12}>
+                    <Button variant="contained" size="large" type="submit" className={classes.connectWalletBtn} onClick={handleConnectWalletClick}>Connect wallet</Button> 
+                  </Grid>
+                </Grid>
+              </Box>
+            </Container>
           </Grid>
     </Grid> 
     )

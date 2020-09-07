@@ -5,7 +5,7 @@ import Web3 from 'web3';
 export default function useFlipCoinScreen() {
 
     const [isWin, setIsWin] = useState<boolean>(false);
-    const [isLost, setIsLost] = useState<boolean>(false);
+    const [isLost, setIsLost] = useState<boolean>(true);
     const [isError, setIsError] = useState<boolean>(false);
     const [transLink, setTransLink] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -36,7 +36,13 @@ export default function useFlipCoinScreen() {
                     }, function(error : any, event : any){ 
                         if(event.returnValues && event.returnValues['isWin'] !== null)
                         {
-                            event.returnValues['isWin'] ? setIsWin(true) : setIsLost(false);
+                            if(event.returnValues['isWin']){
+                                setIsWin(true)
+                                setIsLost(false)
+                            }else{
+                                setIsWin(false)
+                                setIsLost(true)
+                            }
                             setIsLoading(false);
                         }  
                 })
@@ -70,7 +76,6 @@ export default function useFlipCoinScreen() {
     },[]) 
     
     const onSubmit = async (values : any) => {
-        console.log(headsOrTails)
         if(contract){
             await contract.methods.flip(headsOrTails).send({from: account, gas: 3000000, value: web3prov?.utils.toWei(values.amount, "ether")})
             .on("transactionHash", function(hash : any){
