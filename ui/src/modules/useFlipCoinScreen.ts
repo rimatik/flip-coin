@@ -5,7 +5,7 @@ import Web3 from 'web3';
 export default function useFlipCoinScreen() {
 
     const [isWin, setIsWin] = useState<boolean>(false);
-    const [isLost, setIsLost] = useState<boolean>(true);
+    const [isLost, setIsLost] = useState<boolean>(false);
     const [isError, setIsError] = useState<boolean>(false);
     const [transLink, setTransLink] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(false);
